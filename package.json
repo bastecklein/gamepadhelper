@@ -1,0 +1,33 @@
+{
+    "name": "gamepadhelper",
+    "version": "1.0.0",
+    "description": "Simple library for handling gamepad input in web based games, including regular controllers, VR controllers, and touch based controls.",
+    "keywords": ["helpers", "library", "ape apps", "module"],
+    "homepage": "https://www.ape-apps.com",
+    "bugs": {
+        "email": "support@ape-apps.com"
+    },
+    "author": {
+        "name": "Ape Apps",
+        "email": "support@ape-apps.com",
+        "url": "https://www.ape-apps.com"
+    },
+    "funding": {
+        "type": "patreon",
+        "url": "https://www.patreon.com/apeapps"
+    },
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bastecklein/gamepadhelper"
+    },
+    "main": "gamepadhelper.js",
+    "config": {},
+    "dependencies": {
+        "common-helpers": "git+ssh://git@github.com:bastecklein/common-helpers.git#main",
+        "input-helper": "git+ssh://git@github.com:bastecklein/input-helper.git#main"
+    },
+    "devDependencies": {},
+    "private": false,
+    "type": "module"
+}
