@@ -1,6 +1,6 @@
 {
     "name": "gamepadhelper",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Simple library for handling gamepad input in web based games, including regular controllers, VR controllers, and touch based controls.",
     "keywords": ["helpers", "library", "ape apps", "module"],
     "homepage": "https://www.ape-apps.com",

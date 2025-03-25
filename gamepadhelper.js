@@ -1,7 +1,8 @@
-import commonHelpers from "common-helpers";
+import { guid, distBetweenPoints } from "common-helpers";
 import IPH from "input-helper";
 
 const AXES_THRESHOLD = 0.55;
+const GP_HILIGHT_PADDING = 12;
 
 const STANDARD_BUTTONS = {
     0: "a",
@@ -132,7 +133,6 @@ let pads = {
 
 if(window.Android && window.Android.hostHandlesGamepad) {
     hostHandlesGamepad = window.Android.hostHandlesGamepad();
-
     window.andPadEvent = onHostPadEvent;
 }
 
@@ -143,42 +143,46 @@ window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
 
-function VirtualPad() {
-    this.id = "virtPad." + commonHelpers.guid();
+class VirtualPad {
+    constructor() {
+        this.id = "virtPad." + guid();
+
+        this.canvas = document.createElement("canvas");
+        this.context = this.canvas.getContext("2d");
+
+        this.leftStick = true;
+        this.rightStick = true;
+
+        this.buttons = [];
+
+        this.touchstickLeftX = -1;
+        this.touchstickLeftY = -1;
+        this.touchstickLeftId = null;
+        this.touchstickLeftMX = -1;
+        this.touchstickLeftMY = -1;
+
+        this.touchstickRightX = -1;
+        this.touchstickRightY = -1;
+        this.touchstickRightId = null;
+        this.touchstickRightMX = -1;
+        this.touchstickRightMY = -1;
+
+        this.touchstickRadius = 80;
+
+        this.downFunc = null;
+        this.moveFunc = null;
+        this.upFunc = null;
+
+        this.noRender = false;
+    }
     
-    this.render = renderVirtPad;
-
-    this.canvas = document.createElement("canvas");
-    this.context = this.canvas.getContext("2d");
-
-    this.leftStick = true;
-    this.rightStick = true;
-
-    this.buttons = [];
-
-    this.touchstickLeftX = -1;
-    this.touchstickLeftY = -1;
-    this.touchstickLeftId = null;
-    this.touchstickLeftMX = -1;
-    this.touchstickLeftMY = -1;
-
-    this.touchstickRightX = -1;
-    this.touchstickRightY = -1;
-    this.touchstickRightId = null;
-    this.touchstickRightMX = -1;
-    this.touchstickRightMY = -1;
-
-    this.touchstickRadius = 80;
-
-    this.downFunc = null;
-    this.moveFunc = null;
-    this.upFunc = null;
-
-    this.noRender = false;
+    render() {
+        renderVirtPad(this);
+    }
 }
 
 export function register(options) {
-    const regId = commonHelpers.guid();
+    const regId = guid();
 
     registrations[regId] = {
         id: regId,
@@ -339,7 +343,7 @@ export function handleUIGamepadSelection(element, btn) {
             gamepadTitleItem.blur();
         }
 
-        const selectedElement = adl.gamepadXYCheck(button, gamepadTitleItem, element);
+        const selectedElement = gamepadXYCheck(button, gamepadTitleItem, element);
 
         if(selectedElement) {
 
@@ -391,7 +395,7 @@ export function adlMenuPadDown(button) {
         const b = document.querySelector(".adlBlocker");
 
         if(b) {
-            const selectedElement = adl.gamepadXYCheck(button,adlSelectedItem,b);
+            const selectedElement = gamepadXYCheck(button,adlSelectedItem,b);
 
             if(selectedElement) {
 
@@ -419,7 +423,7 @@ export function adlMenuPadDown(button) {
     if(button == "a" && adlSelectedItem) {
         const item = adlSelectedItem;
 
-        if(window.apeApps && window.apeApps.utilities && window.apeApps.utilities.inputHelper && adlSelectedItem.classList.contains("adl-popup-menu-item")) {
+        if(adlSelectedItem.classList.contains("adl-popup-menu-item")) {
             item.dispatchEvent(new PointerEvent("pointerdown"));
             item.dispatchEvent(new PointerEvent("pointerup"));
         } else {
@@ -547,7 +551,7 @@ export function createVirtualPad(options) {
                 for(let i = 0; i < pad.buttons.length; i++) {
                     const button = pad.buttons[i];
 
-                    const dist = commonHelpers.distBetweenPoints(button.x, button.y, x, y);
+                    const dist = distBetweenPoints(button.x, button.y, x, y);
 
                     if(dist < button.radius) {
                         button.pressed = true;
@@ -739,9 +743,7 @@ function reportUp(pad,button) {
     }
 }
 
-function renderVirtPad() {
-    const pad = this;
-
+function renderVirtPad(pad) {
     const parent = pad.canvas.parentElement;
 
     if(!parent || !pad || !pad.context) {
@@ -1247,6 +1249,147 @@ function reportVirtRightTouchMove(pad) {
 
     reportVelocity(pad.id, 3, yPer);
     reportVelocity(pad.id, 2, xPer);
+}
+
+function gamepadXYCheck(direction,compareElement,useParent) {
+
+    let nextElement = null;
+
+    if(!useParent) {
+        useParent = null;
+    }
+
+    const elements = getGamepadSelectableElements(useParent);
+
+    if(elements.length == 0) {
+        return nextElement;
+    }
+
+    if(!compareElement || elements.indexOf(compareElement) == -1) {
+        compareElement = elements[0];
+        return compareElement;
+    }
+
+    nextElement = elements[0];
+
+    const checkBounds = compareElement.getBoundingClientRect();
+    let closestElement = 999999;
+
+    for(let i = 0; i < elements.length; i++) {
+        const element = elements[i];
+
+        if(element == compareElement) {
+            continue;
+        }
+
+        const bounds = element.getBoundingClientRect();
+
+        let doCheck = false;
+
+        if(direction == "right") {
+            if(bounds.left >= checkBounds.right - GP_HILIGHT_PADDING) {
+                doCheck = true;
+            }
+        }
+
+        if(direction == "left") {
+            if(bounds.right <= checkBounds.left + GP_HILIGHT_PADDING) {
+                doCheck = true;
+            }
+        }
+
+        if(direction == "up") {
+            if(bounds.bottom <= checkBounds.top + GP_HILIGHT_PADDING) {
+                doCheck = true;
+            }
+        }
+
+        if(direction == "down") {
+            if(bounds.top >= checkBounds.bottom - GP_HILIGHT_PADDING) {
+                doCheck = true;
+            }
+        }
+
+        if(doCheck) {
+
+            const centerCheck = getBoundsCenterPosition(checkBounds);
+            const center = getBoundsCenterPosition(bounds);
+
+            const dist = distBetweenPoints(centerCheck.x, centerCheck.y, center.x, center.y);
+
+            if(dist < closestElement) {
+                nextElement = element;
+                closestElement = dist;
+            }
+        }
+    }
+
+    return nextElement;
+}
+
+function getBoundsCenterPosition(bounds) {
+    return {
+        x: bounds.left + (bounds.width / 2),
+        y: bounds.top + (bounds.height / 2)
+    };
+}
+
+function getGamepadSelectableElements(useParent = null) {
+
+    let checkEle = null;
+
+    if(useParent) {
+        checkEle = useParent;
+    } else {
+        checkEle = document;
+
+        if(checkIfADLUp()) {
+            checkEle = document.querySelector(".adlBlocker");
+        }
+    }
+
+    if(!checkEle) {
+        checkEle = document;
+    }
+
+    const allEles = checkEle.querySelectorAll(".adlGamepadSelectable");
+    const selectableEles = [];
+
+    for(let i = 0; i < allEles.length; i++) {
+        const element = allEles[i];
+
+        let visible = true;
+        let parent = element;
+
+        while(parent && visible) {
+
+            const style = getComputedStyle(parent);
+
+            if(style.display == "none") {
+                visible = false;
+            }
+
+            if(style.visibility == "hidden") {
+                visible = false;
+            }
+
+            if(style.opacity == "0") {
+                visible = false;
+            }
+
+            if(parent.style.display == "none") {
+                visible = false;
+            }
+
+            parent = parent.parentElement;
+        }
+
+        if(visible) {
+            selectableEles.push(element);
+        }
+    }
+
+    return selectableEles;
 }
 
 export default {
