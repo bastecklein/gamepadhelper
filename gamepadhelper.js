@@ -1336,16 +1336,14 @@ function getBoundsCenterPosition(bounds) {
 
 function getGamepadSelectableElements(useParent = null) {
 
-    let checkEle = null;
+    let checkEle = document;
 
     if(useParent) {
         checkEle = useParent;
-    } else {
-        checkEle = document;
+    }
 
-        if(checkIfADLUp()) {
-            checkEle = document.querySelector(".adlBlocker");
-        }
+    if(checkIfADLUp()) {
+        checkEle = document.querySelector(".adlBlocker");
     }
 
     if(!checkEle) {
