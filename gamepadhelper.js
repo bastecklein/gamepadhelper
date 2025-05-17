@@ -539,147 +539,145 @@ export function createVirtualPad(options) {
         }
     }
 
-    IPH.handleInput(pad.canvas, function(obj, id, x, y, type, pressure, button) {
+    IPH.handleInput({
+        element: pad.canvas,
+        down: function(e) {
+            if(pad.downFunc) {
+                pad.downFunc(e);
+            }
 
-        if(pad.downFunc) {
-            pad.downFunc(obj, id, x, y, type, pressure, button);
-        }
+            if(e.type == "touch") {
 
-        if(type == "touch") {
+                if(pad.buttons) {
+                    for(let i = 0; i < pad.buttons.length; i++) {
+                        const button = pad.buttons[i];
 
-            if(pad.buttons) {
-                for(let i = 0; i < pad.buttons.length; i++) {
-                    const button = pad.buttons[i];
+                        const dist = distBetweenPoints(button.x, button.y, e.x, e.y);
 
-                    const dist = distBetweenPoints(button.x, button.y, x, y);
+                        if(dist < button.radius) {
+                            button.pressed = true;
+                            button.pressedId = e.id;
 
-                    if(dist < button.radius) {
-                        button.pressed = true;
-                        button.pressedId = id;
+                            if(button.callback) {
+                                button.callback();
+                                return;
+                            }
 
-                        if(button.callback) {
-                            button.callback();
-                            return;
-                        }
-
-                        if(button.idx != undefined) {
-                            reportDown(pad.id, button.idx);
-                            return;
+                            if(button.idx != undefined) {
+                                reportDown(pad.id, button.idx);
+                                return;
+                            }
                         }
                     }
                 }
+
+                if(pad.leftStick || pad.rightStick) {
+                    let useStick = "left";
+
+                    if(!pad.leftStick) {
+                        useStick = "right";
+                    }
+        
+                    if(pad.rightStick && e.x > pad.canvas.width / 2) {
+                        useStick = "right";
+                    }
+        
+                    if(useStick == "left") {
+                        pad.touchstickLeftX = e.x;
+                        pad.touchstickLeftY = e.y;
+                        pad.touchstickLeftId = e.id;
+                        pad.touchstickLeftMX = e.x;
+                        pad.touchstickLeftMY = e.y;
+        
+                        reportVirtLeftTouchMove(pad);
+                    } else {
+                        pad.touchstickRightX = e.x;
+                        pad.touchstickRightY = e.y;
+                        pad.touchstickRightId = e.id;
+                        pad.touchstickRightMX = e.x;
+                        pad.touchstickRightMY = e.y;
+        
+                        reportVirtRightTouchMove(pad);
+                    }
+                }
+                    
+            }
+        },
+        move: function(e) {
+            if(pad.moveFunc) {
+                pad.moveFunc(e);
             }
 
-            if(pad.leftStick || pad.rightStick) {
-                let useStick = "left";
+            if(e.type == "touch") {
+                if(pad.leftStick && e.id == pad.touchstickLeftId) {
+                    pad.touchstickLeftMX = e.x;
+                    pad.touchstickLeftMY = e.y;
 
-                if(!pad.leftStick) {
-                    useStick = "right";
-                }
-    
-                if(pad.rightStick && x > pad.canvas.width / 2) {
-                    useStick = "right";
-                }
-    
-                if(useStick == "left") {
-                    pad.touchstickLeftX = x;
-                    pad.touchstickLeftY = y;
-                    pad.touchstickLeftId = id;
-                    pad.touchstickLeftMX = x;
-                    pad.touchstickLeftMY = y;
-    
                     reportVirtLeftTouchMove(pad);
-                } else {
-                    pad.touchstickRightX = x;
-                    pad.touchstickRightY = y;
-                    pad.touchstickRightId = id;
-                    pad.touchstickRightMX = x;
-                    pad.touchstickRightMY = y;
-    
+                }
+
+                if(pad.rightStick && e.id == pad.touchstickRightId) {
+                    pad.touchstickRightMX = e.x;
+                    pad.touchstickRightMY = e.y;
+
                     reportVirtRightTouchMove(pad);
                 }
             }
-                
-        }
-
-            
-    }, function(obj, id, x, y, type, pressure, button) {
-
-        if(pad.moveFunc) {
-            pad.moveFunc(obj, id, x, y, type, pressure, button);
-        }
-
-        if(type == "touch") {
-            if(pad.leftStick && id == pad.touchstickLeftId) {
-                pad.touchstickLeftMX = x;
-                pad.touchstickLeftMY = y;
-
-                reportVirtLeftTouchMove(pad);
+        },
+        up: function(e) {
+            if(pad.upFunc) {
+                pad.upFunc(e);
             }
 
-            if(pad.rightStick && id == pad.touchstickRightId) {
-                pad.touchstickRightMX = x;
-                pad.touchstickRightMY = y;
+            if(e.type == "touch") {
 
-                reportVirtRightTouchMove(pad);
-            }
-        }
+                if(pad.buttons) {
+                    for(let i = 0; i < pad.buttons.length; i++) {
+                        const button = pad.buttons[i];
 
+                        if(button.pressed && button.pressedId == e.id) {
+                            button.pressed = false;
+                            button.pressedId = null;
             
-    }, function(obj, id, type, button) {
-        if(pad.upFunc) {
-            pad.upFunc(obj, id, type, button);
-        }
+                            if(button.upBack) {
+                                button.upBack();
+                                return;
+                            }
 
-        if(type == "touch") {
-
-            if(pad.buttons) {
-                for(let i = 0; i < pad.buttons.length; i++) {
-                    const button = pad.buttons[i];
-
-                    if(button.pressed && button.pressedId == id) {
-                        button.pressed = false;
-                        button.pressedId = null;
-            
-                        if(button.upBack) {
-                            button.upBack();
-                            return;
-                        }
-
-                        if(button.idx != undefined) {
-                            reportUp(pad.id, button.idx);
-                            return;
+                            if(button.idx != undefined) {
+                                reportUp(pad.id, button.idx);
+                                return;
+                            }
                         }
                     }
                 }
+
+                if(pad.leftStick && e.id == pad.touchstickLeftId) {
+                    pad.touchstickLeftX = -1;
+                    pad.touchstickLeftY = -1;
+                    pad.touchstickLeftId = null;
+                    pad.touchstickLeftMX = -1;
+                    pad.touchstickLeftMY = -1;
+
+                    reportVelocity(pad.id, 1, 0);
+                    reportVelocity(pad.id, 0, 0);
+                }
+
+                if(pad.rightStick && e.id == pad.touchstickRightId) {
+                    pad.touchstickRightX = -1;
+                    pad.touchstickRightY = -1;
+                    pad.touchstickRightId = null;
+                    pad.touchstickRightMX = -1;
+                    pad.touchstickRightMY = -1;
+
+                    reportVelocity(pad.id, 3, 0);
+                    reportVelocity(pad.id, 2, 0);
+                }
+
             }
-
-            if(pad.leftStick && id == pad.touchstickLeftId) {
-                pad.touchstickLeftX = -1;
-                pad.touchstickLeftY = -1;
-                pad.touchstickLeftId = null;
-                pad.touchstickLeftMX = -1;
-                pad.touchstickLeftMY = -1;
-
-                reportVelocity(pad.id, 1, 0);
-                reportVelocity(pad.id, 0, 0);
-            }
-
-            if(pad.rightStick && id == pad.touchstickRightId) {
-                pad.touchstickRightX = -1;
-                pad.touchstickRightY = -1;
-                pad.touchstickRightId = null;
-                pad.touchstickRightMX = -1;
-                pad.touchstickRightMY = -1;
-
-                reportVelocity(pad.id, 3, 0);
-                reportVelocity(pad.id, 2, 0);
-            }
-
         }
-
-            
     });
+
 
     return pad;
 }

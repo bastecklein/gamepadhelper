@@ -1,5 +1,11 @@
 # gamepadhelper changelog
 
+## 1.2.0 - 2025-05-17
+
+### Fixed
+
+- Using wrong inputHelper methods
+
 ## 1.1.0 - 2025-03-25
 
 ### Changed
