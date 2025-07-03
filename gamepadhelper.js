@@ -362,6 +362,14 @@ export function handleUIGamepadSelection(element, btn) {
             gamepadTitleItem.blur();
         }
 
+        if(gamepadTitleItem) {
+            const vis = checkElementVisibility(gamepadTitleItem);
+
+            if(!vis) {
+                gamepadTitleItem = null;
+            }
+        }
+
         const selectedElement = gamepadXYCheck(button, gamepadTitleItem, element);
 
         if(selectedElement) {
@@ -1294,7 +1302,7 @@ function reportVirtRightTouchMove(pad) {
     reportVelocity(pad.id, 2, xPer);
 }
 
-function gamepadXYCheck(direction,compareElement,useParent) {
+function gamepadXYCheck(direction, compareElement, useParent) {
 
     let nextElement = null;
 
@@ -1398,7 +1406,9 @@ function getGamepadSelectableElements(useParent = null) {
 
     for(let i = 0; i < allEles.length; i++) {
         const element = allEles[i];
+        const visible = checkElementVisibility(gamepadTitleItem);
 
+        /*
         let visible = true;
         let parent = element;
 
@@ -1423,7 +1433,7 @@ function getGamepadSelectableElements(useParent = null) {
             }
 
             parent = parent.parentElement;
-        }
+        }*/
 
         if(visible) {
             selectableEles.push(element);
@@ -1431,6 +1441,34 @@ function getGamepadSelectableElements(useParent = null) {
     }
 
     return selectableEles;
+}
+
+function checkElementVisibility(element) {
+    if(!element) {
+        return false;
+    }
+
+    const style = getComputedStyle(element);
+
+    if(style.display == "none") {
+        return false;
+    }
+
+    if(style.visibility == "hidden") {
+        return false;
+    }
+
+    if(style.opacity == "0") {
+        return false;
+    }
+
+    let parent = element.parentElement;
+
+    if(parent) {
+        return checkElementVisibility(parent);
+    }
+
+    return true;
 }
 
 export default {
