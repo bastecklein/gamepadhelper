@@ -1,6 +1,20 @@
 import { guid, distBetweenPoints } from "common-helpers";
 import IPH from "input-helper";
 
+const userAgent = navigator.userAgent;
+
+let runningOnAndroidTV = false;
+
+if(userAgent) {
+    const isAndroid = /Android/i.test(userAgent);
+    const isTV = /TV/i.test(userAgent) || /AFT/.test(userAgent);
+
+    if(isAndroid && isTV) {
+        runningOnAndroidTV = true;
+    }
+}
+
+
 const AXES_THRESHOLD = 0.55;
 const GP_HILIGHT_PADDING = 12;
 
@@ -1147,11 +1161,24 @@ function onGamepadDisconnected(e) {
 }
 
 function onKeyDown(e) {
+
+    
+
     if(e && e.keyCode) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
 
-        if(button != undefined) {
-            reportDown("remote", button);
+        const isTyping = document.activeElement && (
+            document.activeElement.tagName === 'INPUT' ||
+            document.activeElement.tagName === 'TEXTAREA' ||
+            document.activeElement.isContentEditable
+        );
+
+        if (runningOnAndroidTV && !isTyping && button) {
+            e.preventDefault();
+
+            if(button != undefined) {
+                reportDown("remote", button);
+            }
         }
     }
 }
@@ -1160,9 +1187,21 @@ function onKeyUp(e) {
     if(e && e.keyCode) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
 
-        if(button != undefined) {
-            reportUp("remote", button);
+        const isTyping = document.activeElement && (
+            document.activeElement.tagName === 'INPUT' ||
+            document.activeElement.tagName === 'TEXTAREA' ||
+            document.activeElement.isContentEditable
+        );
+
+        if (runningOnAndroidTV && !isTyping && button) {
+            e.preventDefault();
+
+            if(button != undefined) {
+                reportUp("remote", button);
+            }
         }
+
+        
     }
 }
 
