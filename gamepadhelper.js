@@ -1172,13 +1172,14 @@ function onKeyDown(e) {
     if(e && e.keyCode) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
 
+        /*
         const isTyping = document.activeElement && (
             document.activeElement.tagName === 'INPUT' ||
             document.activeElement.tagName === 'TEXTAREA' ||
             document.activeElement.isContentEditable
-        );
+        );*/
 
-        if (runningOnAndroidTV && !isTyping && button != undefined) {
+        if (runningOnAndroidTV && button != undefined) {
             e.preventDefault();
 
             reportDown("remote", button);
@@ -1187,16 +1188,20 @@ function onKeyDown(e) {
 }
 
 function onKeyUp(e) {
+
+    console.log(e.key);
+
     if(e && e.keyCode) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
 
+        /*
         const isTyping = document.activeElement && (
             document.activeElement.tagName === 'INPUT' ||
             document.activeElement.tagName === 'TEXTAREA' ||
             document.activeElement.isContentEditable
-        );
+        );*/
 
-        if (runningOnAndroidTV && !isTyping && button != undefined) {
+        if (runningOnAndroidTV && button != undefined) {
             e.preventDefault();
 
             reportUp("remote", button);
