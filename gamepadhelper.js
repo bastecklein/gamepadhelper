@@ -11,7 +11,12 @@ if(userAgent) {
 
     if(isAndroid && isTV) {
         runningOnAndroidTV = true;
+    } else {
+        console.log("Not running on Android TV");
+        console.log("User Agent: " + userAgent);
     }
+} else {
+    console.log("NO UA!");
 }
 
 
@@ -1173,12 +1178,10 @@ function onKeyDown(e) {
             document.activeElement.isContentEditable
         );
 
-        if (runningOnAndroidTV && !isTyping && button) {
+        if (runningOnAndroidTV && !isTyping && button != undefined) {
             e.preventDefault();
 
-            if(button != undefined) {
-                reportDown("remote", button);
-            }
+            reportDown("remote", button);
         }
     }
 }
@@ -1193,12 +1196,10 @@ function onKeyUp(e) {
             document.activeElement.isContentEditable
         );
 
-        if (runningOnAndroidTV && !isTyping && button) {
+        if (runningOnAndroidTV && !isTyping && button != undefined) {
             e.preventDefault();
 
-            if(button != undefined) {
-                reportUp("remote", button);
-            }
+            reportUp("remote", button);
         }
 
         
