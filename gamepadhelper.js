@@ -374,9 +374,13 @@ export function handleUIGamepadSelection(element, btn) {
             }
         }
 
+        console.log(gamepadTitleItem);
+
         const selectedElement = gamepadXYCheck(button, gamepadTitleItem, element);
 
         if(selectedElement) {
+
+            console.log(selectedElement);
 
             let ok = true;
             let test = selectedElement;
@@ -1315,6 +1319,8 @@ function gamepadXYCheck(direction, compareElement, useParent) {
     }
 
     const elements = getGamepadSelectableElements(useParent);
+
+    console.log(elements);
 
     if(elements.length == 0) {
         return nextElement;
