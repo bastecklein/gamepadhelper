@@ -1419,7 +1419,7 @@ function getGamepadSelectableElements(useParent = null) {
 
     for(let i = 0; i < allEles.length; i++) {
         const element = allEles[i];
-        const visible = checkElementVisibility(gamepadTitleItem);
+        const visible = checkElementVisibility(element);
 
         /*
         let visible = true;
