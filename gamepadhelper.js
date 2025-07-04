@@ -374,7 +374,7 @@ export function handleUIGamepadSelection(element, btn) {
             }
         }
 
-        console.log("ck1");
+        console.log("ck3");
         console.log(gamepadTitleItem);
 
         const selectedElement = gamepadXYCheck(button, gamepadTitleItem, element);
