@@ -11,12 +11,7 @@ if(userAgent) {
 
     if(isAndroid && isTV) {
         runningOnAndroidTV = true;
-    } else {
-        console.log("Not running on Android TV");
-        console.log("User Agent: " + userAgent);
     }
-} else {
-    console.log("NO UA!");
 }
 
 
@@ -344,8 +339,6 @@ export function setADLInstance(adlInstance) {
 export function handleUIGamepadSelection(element, btn) {
     const button = convertButtonForADL(standardButtonConversion(btn));
 
-    console.log(btn + " -> " + button);
-
     if(button == "up" || button == "left" || button == "right" || button == "down") {
 
         if(!gamepadTitleItem) {
@@ -376,15 +369,9 @@ export function handleUIGamepadSelection(element, btn) {
             }
         }
 
-        console.log("ck3");
-        console.log(gamepadTitleItem);
-
         const selectedElement = gamepadXYCheck(button, gamepadTitleItem, element);
 
         if(selectedElement) {
-
-            console.log("ck2");
-            console.log(selectedElement);
 
             let ok = true;
             let test = selectedElement;
@@ -1110,10 +1097,6 @@ function reportVelocity(pad, axis, val) {
     const axisName = useConst[axis];
 
     if(!axisName) {
-        if(val != 0) {
-            console.log("no axis: " + pad + " -> " + axis);
-        }
-        
         return;
     }
 
@@ -1192,13 +1175,6 @@ function onKeyDown(e) {
     if(e && e.keyCode) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
 
-        /*
-        const isTyping = document.activeElement && (
-            document.activeElement.tagName === 'INPUT' ||
-            document.activeElement.tagName === 'TEXTAREA' ||
-            document.activeElement.isContentEditable
-        );*/
-
         if (runningOnAndroidTV && button != undefined) {
             e.preventDefault();
 
@@ -1209,17 +1185,8 @@ function onKeyDown(e) {
 
 function onKeyUp(e) {
 
-    console.log(e.key);
-
     if(e && e.keyCode) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
-
-        /*
-        const isTyping = document.activeElement && (
-            document.activeElement.tagName === 'INPUT' ||
-            document.activeElement.tagName === 'TEXTAREA' ||
-            document.activeElement.isContentEditable
-        );*/
 
         if (runningOnAndroidTV && button != undefined) {
             e.preventDefault();
@@ -1227,7 +1194,6 @@ function onKeyUp(e) {
             reportUp("remote", button);
         }
 
-        
     }
 }
 
@@ -1323,9 +1289,6 @@ function gamepadXYCheck(direction, compareElement, useParent) {
     }
 
     const elements = getGamepadSelectableElements(useParent);
-
-    console.log("ck1");
-    console.log(elements);
 
     if(elements.length == 0) {
         return nextElement;
