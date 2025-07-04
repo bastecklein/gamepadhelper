@@ -344,6 +344,8 @@ export function setADLInstance(adlInstance) {
 export function handleUIGamepadSelection(element, btn) {
     const button = convertButtonForADL(standardButtonConversion(btn));
 
+    console.log(btn + " -> " + button);
+
     if(button == "up" || button == "left" || button == "right" || button == "down") {
 
         if(!gamepadTitleItem) {
