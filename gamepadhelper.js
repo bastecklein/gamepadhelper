@@ -351,11 +351,15 @@ export function handleUIGamepadSelection(element, btn) {
         }
 
         if(!gamepadTitleItem) {
-            gamepadTitleItem = document.querySelector(".adlGamepadSelected");
-        }
-
-        if(gamepadTitleItem && getComputedStyle(gamepadTitleItem).display == "none") {
-            gamepadTitleItem = null;
+            // Find visible .adlGamepadSelected elements instead of just the first one
+            const adlSelected = document.querySelectorAll(".adlGamepadSelected");
+            for(let i = 0; i < adlSelected.length; i++) {
+                const element = adlSelected[i];
+                if(checkElementVisibility(element)) {
+                    gamepadTitleItem = element;
+                    break;
+                }
+            }
         }
 
         if(gamepadTitleItem && gamepadTitleItem.blur) {
