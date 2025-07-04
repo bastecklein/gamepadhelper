@@ -374,12 +374,14 @@ export function handleUIGamepadSelection(element, btn) {
             }
         }
 
+        console.log("ck1");
         console.log(gamepadTitleItem);
 
         const selectedElement = gamepadXYCheck(button, gamepadTitleItem, element);
 
         if(selectedElement) {
 
+            console.log("ck2");
             console.log(selectedElement);
 
             let ok = true;
@@ -1320,6 +1322,7 @@ function gamepadXYCheck(direction, compareElement, useParent) {
 
     const elements = getGamepadSelectableElements(useParent);
 
+    console.log("ck1");
     console.log(elements);
 
     if(elements.length == 0) {
