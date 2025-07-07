@@ -337,16 +337,16 @@ export function setADLInstance(adlInstance) {
 }
 
 export function handleUIGamepadSelection(element, btn) {
-    if(!gamepadTitleItem) {
-        gamepadTitleItem = document.querySelector(".gamepadHighlighted");
-    }
+    
 
     const button = convertButtonForADL(standardButtonConversion(btn));
 
+    console.log(gamepadTitleItem);
+    console.log(button);
+
     if(gamepadTitleItem && button == "left" || button == "right") {
 
-        console.log(gamepadTitleItem);
-        console.log(button);
+        
         console.log(gamepadTitleItem.tagName);
         console.log(gamepadTitleItem.type );
 
@@ -369,7 +369,9 @@ export function handleUIGamepadSelection(element, btn) {
 
     if(button == "up" || button == "left" || button == "right" || button == "down") {
 
-        
+        if(!gamepadTitleItem) {
+            gamepadTitleItem = document.querySelector(".gamepadHighlighted");
+        }
 
         if(!gamepadTitleItem) {
             // Find visible .adlGamepadSelected elements instead of just the first one
@@ -447,6 +449,26 @@ export function adlMenuPadDown(button) {
         const b = document.querySelector(".adlBlocker");
 
         if(b) {
+
+
+            if(adlSelectedItem) {
+                if(button == "left" || button == "right") {
+                    if(adlSelectedItem.tagName == "INPUT" && adlSelectedItem.type == "range") {
+                        if(button == "right") {
+                            gamepadTitleItem.value = Math.min(parseInt(gamepadTitleItem.value) + 1, parseInt(gamepadTitleItem.max));
+                        }
+
+                        if(button == "left") {
+                            gamepadTitleItem.value = Math.max(parseInt(gamepadTitleItem.value) - 1, parseInt(gamepadTitleItem.min));
+                        }
+
+                        gamepadTitleItem.dispatchEvent(new Event("input"));
+                        gamepadTitleItem.dispatchEvent(new Event("change"));
+                        return true;
+                    }
+                }
+            }
+
             const selectedElement = gamepadXYCheck(button,adlSelectedItem,b);
 
             if(selectedElement) {
