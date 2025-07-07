@@ -341,14 +341,9 @@ export function handleUIGamepadSelection(element, btn) {
 
     const button = convertButtonForADL(standardButtonConversion(btn));
 
-    console.log(gamepadTitleItem);
-    console.log(button);
 
     if(gamepadTitleItem && button == "left" || button == "right") {
 
-        
-        console.log(gamepadTitleItem.tagName);
-        console.log(gamepadTitleItem.type );
 
         // is gamepadTitleItem an input with type range
         if(gamepadTitleItem.tagName == "INPUT" && gamepadTitleItem.type == "range") {
@@ -450,20 +445,19 @@ export function adlMenuPadDown(button) {
 
         if(b) {
 
-
             if(adlSelectedItem) {
                 if(button == "left" || button == "right") {
                     if(adlSelectedItem.tagName == "INPUT" && adlSelectedItem.type == "range") {
                         if(button == "right") {
-                            gamepadTitleItem.value = Math.min(parseInt(gamepadTitleItem.value) + 1, parseInt(gamepadTitleItem.max));
+                            adlSelectedItem.value = Math.min(parseInt(adlSelectedItem.value) + 1, parseInt(adlSelectedItem.max));
                         }
 
                         if(button == "left") {
-                            gamepadTitleItem.value = Math.max(parseInt(gamepadTitleItem.value) - 1, parseInt(gamepadTitleItem.min));
+                            adlSelectedItem.value = Math.max(parseInt(adlSelectedItem.value) - 1, parseInt(adlSelectedItem.min));
                         }
 
-                        gamepadTitleItem.dispatchEvent(new Event("input"));
-                        gamepadTitleItem.dispatchEvent(new Event("change"));
+                        adlSelectedItem.dispatchEvent(new Event("input"));
+                        adlSelectedItem.dispatchEvent(new Event("change"));
                         return true;
                     }
                 }
