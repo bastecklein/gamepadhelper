@@ -339,6 +339,24 @@ export function setADLInstance(adlInstance) {
 export function handleUIGamepadSelection(element, btn) {
     const button = convertButtonForADL(standardButtonConversion(btn));
 
+    if(gamepadTitleItem && button == "left" || button == "right") {
+        // is gamepadTitleItem an input with type range
+        if(gamepadTitleItem.tagName == "INPUT" && gamepadTitleItem.type == "range") {
+            // Handle range input specific logic
+            if(button == "right") {
+                gamepadTitleItem.value = Math.min(parseInt(gamepadTitleItem.value) + 1, parseInt(gamepadTitleItem.max));
+            }
+
+            if(button == "left") {
+                gamepadTitleItem.value = Math.max(parseInt(gamepadTitleItem.value) - 1, parseInt(gamepadTitleItem.min));
+            }
+
+            gamepadTitleItem.dispatchEvent(new Event("input"));
+            gamepadTitleItem.dispatchEvent(new Event("change"));
+            return true;
+        }
+    }
+
     if(button == "up" || button == "left" || button == "right" || button == "down") {
 
         if(!gamepadTitleItem) {
