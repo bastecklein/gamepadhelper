@@ -337,6 +337,10 @@ export function setADLInstance(adlInstance) {
 }
 
 export function handleUIGamepadSelection(element, btn) {
+    if(!gamepadTitleItem) {
+        gamepadTitleItem = document.querySelector(".gamepadHighlighted");
+    }
+
     const button = convertButtonForADL(standardButtonConversion(btn));
 
     if(gamepadTitleItem && button == "left" || button == "right") {
@@ -365,9 +369,7 @@ export function handleUIGamepadSelection(element, btn) {
 
     if(button == "up" || button == "left" || button == "right" || button == "down") {
 
-        if(!gamepadTitleItem) {
-            gamepadTitleItem = document.querySelector(".gamepadHighlighted");
-        }
+        
 
         if(!gamepadTitleItem) {
             // Find visible .adlGamepadSelected elements instead of just the first one
