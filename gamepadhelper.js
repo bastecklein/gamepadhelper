@@ -1214,7 +1214,7 @@ function onKeyDown(e) {
 
     
 
-    if(e && e.keyCode) {
+    if(e && e.keyCode && !e.repeat) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
 
         if (runningOnAndroidTV && button != undefined) {
@@ -1227,7 +1227,7 @@ function onKeyDown(e) {
 
 function onKeyUp(e) {
 
-    if(e && e.keyCode) {
+    if(e && e.keyCode && !e.repeat) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
 
         if (runningOnAndroidTV && button != undefined) {
