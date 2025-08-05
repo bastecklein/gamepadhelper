@@ -1216,15 +1216,18 @@ function onGamepadDisconnected(e) {
 
 function onKeyDown(e) {
 
-    
-
     if(e && e.keyCode && !e.repeat) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
 
         if (runningOnAndroidTV && button != undefined) {
+
+            console.log("Got Android Remote Key: " + e.keyCode + " as " + button);
+
             e.preventDefault();
 
             reportDown("remote", button);
+        } else {
+            console.log("Not handling Android Remote Key: " + e.keyCode + " as " + button);
         }
     }
 }
