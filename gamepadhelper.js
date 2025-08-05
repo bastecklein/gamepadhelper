@@ -11,6 +11,10 @@ if(userAgent) {
 
     if(isAndroid && isTV) {
         runningOnAndroidTV = true;
+        console.log("GPH Running on Android TV");
+    } else {
+        runningOnAndroidTV = false;
+        console.log("GPH Not running on Android TV", userAgent);
     }
 }
 
