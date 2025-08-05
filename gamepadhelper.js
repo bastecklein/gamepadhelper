@@ -11,10 +11,8 @@ if(userAgent) {
 
     if(isAndroid && isTV) {
         runningOnAndroidTV = true;
-        console.log("GPH Running on Android TV");
     } else {
         runningOnAndroidTV = false;
-        console.log("GPH Not running on Android TV", userAgent);
     }
 }
 
@@ -781,7 +779,7 @@ function reportDown(pad, button) {
         return;
     }
 
-    if(pad == "remote" && ignoreKeyboard) {
+    if(pad == "remote" && ignoreKeyboard && !runningOnAndroidTV) {
         return;
     }
 
@@ -800,7 +798,7 @@ function reportUp(pad,button) {
         return;
     }
 
-    if(pad == "remote" && ignoreKeyboard) {
+    if(pad == "remote" && ignoreKeyboard && !runningOnAndroidTV) {
         return;
     }
 
@@ -1220,14 +1218,8 @@ function onKeyDown(e) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
 
         if (runningOnAndroidTV && button != undefined) {
-
-            console.log("Got Android Remote Key: " + e.keyCode + " as " + button);
-
             e.preventDefault();
-
             reportDown("remote", button);
-        } else {
-            console.log("Not handling Android Remote Key: " + e.keyCode + " as " + button);
         }
     }
 }
