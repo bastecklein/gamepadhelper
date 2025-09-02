@@ -321,17 +321,11 @@ export function setVRSession(session) {
 }
 
 export function checkIfADLUp() {
-    const blocker = document.querySelectorAll(".adlBlocker");
-
-    for(let i = 0; i < blocker.length; i++) {
-        const b = blocker[i];
-
-        if(b.style.display == "block") {
-            return true;
-        }
+    if(!adl) {
+        return false;
     }
 
-    return false;
+    return adl.isDialogOpen();
 }
 
 export function setADLInstance(adlInstance) {
