@@ -325,7 +325,13 @@ export function checkIfADLUp() {
         return false;
     }
 
-    return adl.isDialogOpen();
+    const dialog = adl.isDialogOpen();
+
+    if(dialog) {
+        return dialog;
+    }
+
+    return false;
 }
 
 export function setADLInstance(adlInstance) {
@@ -432,12 +438,26 @@ export function handleUIGamepadSelection(element, btn) {
     return false;
 }
 
+export function getADLPadZone() {
+    const zones = document.querySelectorAll(".adlPadZone");
+
+    // loop through and see if the zone is visible
+    for(let i = 0; i < zones.length; i++) {
+        const zone = zones[i];
+        if(checkElementVisibility(zone)) {
+            return zone;
+        }
+    }
+
+    return null;
+}
+
 export function adlMenuPadDown(button) {
     button = convertButtonForADL(standardButtonConversion(button));
 
     if(button == "up" || button == "left" || button == "right" || button == "down") {
 
-        const b = document.querySelector(".adlBlocker");
+        const b = getADLPadZone();
 
         if(b) {
 
@@ -1407,7 +1427,7 @@ function getGamepadSelectableElements(useParent = null) {
     }
 
     if(checkIfADLUp()) {
-        checkEle = document.querySelector(".adlPadZone");
+        checkEle = getADLPadZone();
     }
 
     if(!checkEle) {
@@ -1501,5 +1521,6 @@ export default {
     setGamepadTitleItem,
     highlightSelectedTitleElement,
     createVirtualPad,
-    setScrollBehavior
+    setScrollBehavior,
+    getADLPadZone
 };
