@@ -1407,7 +1407,7 @@ function getGamepadSelectableElements(useParent = null) {
     }
 
     if(checkIfADLUp()) {
-        checkEle = document.querySelector(".adlBlocker");
+        checkEle = document.querySelector(".adlPadZone");
     }
 
     if(!checkEle) {
