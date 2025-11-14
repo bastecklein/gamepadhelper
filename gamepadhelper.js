@@ -344,7 +344,7 @@ export function handleUIGamepadSelection(element, btn) {
     const button = convertButtonForADL(standardButtonConversion(btn));
 
 
-    if(gamepadTitleItem && button == "left" || button == "right") {
+    if(gamepadTitleItem && (button == "left" || button == "right")) {
 
 
         // is gamepadTitleItem an input with type range
