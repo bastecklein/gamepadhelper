@@ -1022,6 +1022,10 @@ function onFrame() {
             }
 
             if(activeSinglePad != idx) {
+
+                console.log("Skipping pad " + idx + " due to single only mode (" + activeSinglePad + ").");
+                console.log(gamepads);
+
                 continue;
             }
         }
