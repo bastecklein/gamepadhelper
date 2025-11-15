@@ -16,7 +16,6 @@ if(userAgent) {
     }
 }
 
-
 const AXES_THRESHOLD = 0.55;
 const GP_HILIGHT_PADDING = 12;
 
@@ -126,18 +125,30 @@ const VR_AXES_NAMES = {
 };
 
 let hostHandlesGamepad = false;
-let registrations = {};
 let totalReg = 0;
 let vrSerssion = null;
 let frameWasForced = false;
 let manualPolling = false;
 let ignoreKeyboard = false;
 let scrollBehavior = "smooth";
+let remotes = false;
+let singleOnly = false;
+
+let listeners = {
+    up: null,
+    down: null,
+    velocity: null,
+    onConnect: null,
+    onDisconnect: null
+};
 
 let adl = null;
 let adlSelectedItem = null;
 
 let gamepadTitleItem = null;
+
+let activeSinglePad = null;
+let clearActiveTimeout = null;
 
 let pads = {
     traditional: {},
@@ -197,38 +208,44 @@ class VirtualPad {
     }
 }
 
+/**
+ * Registers settings and listeners for gamepad handling.
+ * @param {Object} options - Configuration options for gamepad handling.
+ * @param {Object} [options.adl] - ADL instance for menu handling.
+ * @param {boolean} [options.remotes=false] - Whether to handle remote controls.
+ * @param {boolean} [options.singleOnly=false] - Whether to handle only a single gamepad.
+ * @param {Function} [options.up] - Callback for button release events.
+ * @param {Function} [options.down] - Callback for button press events.
+ * @param {Function} [options.velocity] - Callback for axis movement events.
+ * @param {Object} [options.vrSession] - WebXR VR session for VR controller handling.
+ * @param {boolean} [options.ignoreKeyboard=false] - Whether to ignore keyboard events for remotes.
+ * @param {Function} [options.onConnect] - Callback for gamepad connection events.
+ * @param {Function} [options.onDisconnect] - Callback for gamepad disconnection events.
+ */
 export function register(options) {
-    const regId = guid();
-
-    registrations[regId] = {
-        id: regId,
-        up: null,
-        down: null,
-        velocity: null,
-        vrSession: null,
-        onConnect: null,
-        onDisconnect: null,
-        remotes: false
-    };
 
     if(options.adl != undefined) {
         adl = options.adl;
     }
 
     if(options.remotes != undefined) {
-        registrations[regId].remotes = options.remotes;
+        remotes = options.remotes;
+    }
+
+    if(options.singleOnly != undefined) {
+        singleOnly = options.singleOnly;
     }
 
     if(options.up != undefined) {
-        registrations[regId].up = options.up;
+        listeners.up = options.up;
     }
 
     if(options.down != undefined) {
-        registrations[regId].down = options.down;
+        listeners.down = options.down;
     }
 
     if(options.velocity != undefined) {
-        registrations[regId].velocity = options.velocity;
+        listeners.velocity = options.velocity;
     }
 
     if(options.vrSession != undefined) {
@@ -240,21 +257,26 @@ export function register(options) {
     }
 
     if(options.onConnect != undefined) {
-        registrations[regId].onConnect = options.onConnect;
+        listeners.onConnect = options.onConnect;
     }
 
     if(options.onDisconnect != undefined) {
-        registrations[regId].onDisconnect = options.onDisconnect;
+        listeners.onDisconnect = options.onDisconnect;
     }
-
-    totalReg++;
-
-    return regId;
 }
 
-export function unregister(id) {
-    delete registrations[id];
-    totalReg--;
+export function unregister() {
+    listeners = {
+        up: null,
+        down: null,
+        velocity: null,
+        onConnect: null,
+        onDisconnect: null
+    };
+
+    remotes = false;
+    adl = null;
+    singleOnly = false;
 }
 
 export function standardButtonConversion(button) {
@@ -797,12 +819,12 @@ function reportDown(pad, button) {
         return;
     }
 
-    for(let regid in registrations) {
-        const registration = registrations[regid];
+    if(singleOnly) {
+        clearActivePadTimeout();
+    }
 
-        if(registration.down) {
-            registration.down(pad,button);
-        }
+    if(listeners.down) {
+        listeners.down(pad, button);
     }
 }
 
@@ -816,12 +838,8 @@ function reportUp(pad,button) {
         return;
     }
 
-    for(let regid in registrations) {
-        const registration = registrations[regid];
-
-        if(registration.up) {
-            registration.up(pad,button);
-        }
+    if(listeners.up) {
+        listeners.up(pad, button);
     }
 }
 
@@ -989,6 +1007,25 @@ function onFrame() {
 
         const idx = gamepad.index;
 
+        if(singleOnly) {
+            if(activeSinglePad == null) {
+                activeSinglePad = idx;
+
+                // clear out any existing pads
+                pads = {
+                    traditional: {},
+                    traditionalVelocities: {},
+                    vrLeft: null,
+                    vrRight: null,
+                    vrNone: null
+                };
+            }
+
+            if(activeSinglePad != idx) {
+                continue;
+            }
+        }
+
         let buttonStates = pads.traditional[idx];
 
         if(!buttonStates) {
@@ -1022,12 +1059,12 @@ function onFrame() {
             if(axis > AXES_THRESHOLD) {
                 if(!buttonStates[fName]) {
                     buttonStates[fName] = true;
-                    reportDown(idx,fName);
+                    reportDown(idx, fName);
                 }
             } else {
                 if(buttonStates[fName]) {
                     buttonStates[fName] = false;
-                    reportUp(idx,fName);
+                    reportUp(idx, fName);
                 }
             }
 
@@ -1035,16 +1072,16 @@ function onFrame() {
             if(axis < -AXES_THRESHOLD) {
                 if(!buttonStates[gName]) {
                     buttonStates[gName] = true;
-                    reportDown(idx,gName);
+                    reportDown(idx, gName);
                 }
             } else {
                 if(buttonStates[gName]) {
                     buttonStates[gName] = false;
-                    reportUp(idx,gName);
+                    reportUp(idx, gName);
                 }
             }
 
-            reportVelocity(idx,i,axis);
+            reportVelocity(idx, i, axis);
         }
     }
 
@@ -1172,12 +1209,8 @@ function reportVelocity(pad, axis, val) {
         return;
     }
 
-    for(let regid in registrations) {
-        const registration = registrations[regid];
-
-        if(registration.velocity) {
-            registration.velocity(pad, axisName, val);
-        }
+    if(listeners.velocity) {
+        listeners.velocity(pad, axisName, val);
     }
 
     usePads[pad][axis] = val;
@@ -1190,18 +1223,13 @@ function onGamepadConnected(e) {
 
         pads.traditional[gp.index] = {};
 
-        for(let regid in registrations) {
-            const registration = registrations[regid];
-
-            if(registration.onConnect) {
-                registration.onConnect({
-                    reg: registration.id,
-                    idx: e.gamepad.index,
-                    id: e.gamepad.id,
-                    buttons: e.gamepad.buttons.length,
-                    axes: e.gamepad.axes.length
-                });
-            }
+        if(listeners.onConnect) {
+            listeners.onConnect({
+                idx: e.gamepad.index,
+                id: e.gamepad.id,
+                buttons: e.gamepad.buttons.length,
+                axes: e.gamepad.axes.length
+            });
         }
     }
 }
@@ -1213,20 +1241,26 @@ function onGamepadDisconnected(e) {
 
         delete pads.traditional[gp.index];
 
-        for(let regid in registrations) {
-            const registration = registrations[regid];
+        if(listeners.onDisconnect) {
+            listeners.onDisconnect({
+                idx: e.gamepad.index
+            });
+        }
 
-            if(registration.onDisconnect) {
-                registration.onDisconnect({
-                    reg: registration.id,
-                    idx: e.gamepad.index
-                });
+        if(singleOnly) {
+            if(activeSinglePad == e.gamepad.index) {
+                clearActivePadTimeout();
+                activeSinglePad = null;
             }
         }
     }
 }
 
 function onKeyDown(e) {
+
+    if(!remotes) {
+        return;
+    }
 
     if(e && e.keyCode && !e.repeat) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
@@ -1239,6 +1273,10 @@ function onKeyDown(e) {
 }
 
 function onKeyUp(e) {
+
+    if(!remotes) {
+        return;
+    }
 
     if(e && e.keyCode && !e.repeat) {
         const button = FIRE_REMOTE_BUTTONS[e.keyCode];
@@ -1441,33 +1479,6 @@ function getGamepadSelectableElements(useParent = null) {
         const element = allEles[i];
         const visible = checkElementVisibility(element);
 
-        /*
-        let visible = true;
-        let parent = element;
-
-        while(parent && visible) {
-
-            const style = getComputedStyle(parent);
-
-            if(style.display == "none") {
-                visible = false;
-            }
-
-            if(style.visibility == "hidden") {
-                visible = false;
-            }
-
-            if(style.opacity == "0") {
-                visible = false;
-            }
-
-            if(parent.style.display == "none") {
-                visible = false;
-            }
-
-            parent = parent.parentElement;
-        }*/
-
         if(visible) {
             selectableEles.push(element);
         }
@@ -1502,6 +1513,16 @@ function checkElementVisibility(element) {
     }
 
     return true;
+}
+
+function clearActivePadTimeout() {
+    if(clearActiveTimeout) {
+        clearTimeout(clearActiveTimeout);
+    }
+
+    clearActiveTimeout = setTimeout(function() {
+        activeSinglePad = null;
+    }, 20000);
 }
 
 export default {
