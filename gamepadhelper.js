@@ -125,7 +125,7 @@ const VR_AXES_NAMES = {
 };
 
 let hostHandlesGamepad = false;
-let totalReg = 0;
+let registered = false;
 let vrSerssion = null;
 let frameWasForced = false;
 let manualPolling = false;
@@ -264,7 +264,7 @@ export function register(options) {
         listeners.onDisconnect = options.onDisconnect;
     }
 
-    console.log("Pads Registered", options, listeners);
+    registered = true;
 }
 
 export function unregister() {
@@ -279,6 +279,7 @@ export function unregister() {
     remotes = false;
     adl = null;
     singleOnly = false;
+    registered = false;
 }
 
 export function standardButtonConversion(button) {
@@ -989,8 +990,7 @@ function onFrame() {
     }
     
 
-    if(totalReg <= 0) {
-        totalReg = 0;
+    if(!registered) {
         return;
     }
 
@@ -1024,13 +1024,7 @@ function onFrame() {
             }
 
             if(activeSinglePad != idx) {
-
-                console.log("Skipping pad " + idx + " due to single only mode (" + activeSinglePad + ").");
-                console.log(gamepads);
-
                 continue;
-            } else {
-                console.log(activeSinglePad + " is active pad.");
             }
         }
 
