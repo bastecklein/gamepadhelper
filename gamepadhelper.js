@@ -263,6 +263,8 @@ export function register(options) {
     if(options.onDisconnect != undefined) {
         listeners.onDisconnect = options.onDisconnect;
     }
+
+    console.log("Pads Registered", options, listeners);
 }
 
 export function unregister() {
@@ -1027,6 +1029,8 @@ function onFrame() {
                 console.log(gamepads);
 
                 continue;
+            } else {
+                console.log(activeSinglePad + " is active pad.");
             }
         }
 
