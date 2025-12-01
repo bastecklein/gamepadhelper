@@ -182,6 +182,8 @@ class VirtualPad {
 
         this.buttons = [];
 
+        this.virtButtons = {};
+
         this.touchstickLeftX = -1;
         this.touchstickLeftY = -1;
         this.touchstickLeftId = null;
@@ -764,6 +766,26 @@ export function createVirtualPad(options) {
                 pad.touchstickLeftMX = -1;
                 pad.touchstickLeftMY = -1;
 
+                if(pad.virtButtons["a0neg"]) {
+                    pad.virtButtons["a0neg"] = false;
+                    reportUp(pad.id, "a0neg");
+                }
+
+                if(pad.virtButtons["a0pos"]) {
+                    pad.virtButtons["a0pos"] = false;
+                    reportUp(pad.id, "a0pos");
+                }
+
+                if(pad.virtButtons["a1neg"]) {
+                    pad.virtButtons["a1neg"] = false;
+                    reportUp(pad.id, "a1neg");
+                }
+
+                if(pad.virtButtons["a1pos"]) {
+                    pad.virtButtons["a1pos"] = false;
+                    reportUp(pad.id, "a1pos");
+                }
+
                 reportVelocity(pad.id, 1, 0);
                 reportVelocity(pad.id, 0, 0);
             }
@@ -774,6 +796,26 @@ export function createVirtualPad(options) {
                 pad.touchstickRightId = null;
                 pad.touchstickRightMX = -1;
                 pad.touchstickRightMY = -1;
+
+                if(pad.virtButtons["a2neg"]) {
+                    pad.virtButtons["a2neg"] = false;
+                    reportUp(pad.id, "a2neg");
+                }
+
+                if(pad.virtButtons["a2pos"]) {
+                    pad.virtButtons["a2pos"] = false;
+                    reportUp(pad.id, "a2pos");
+                }
+
+                if(pad.virtButtons["a3neg"]) {
+                    pad.virtButtons["a3neg"] = false;
+                    reportUp(pad.id, "a3neg");
+                }
+
+                if(pad.virtButtons["a3pos"]) {
+                    pad.virtButtons["a3pos"] = false;
+                    reportUp(pad.id, "a3pos");
+                }
 
                 reportVelocity(pad.id, 3, 0);
                 reportVelocity(pad.id, 2, 0);
@@ -1335,6 +1377,54 @@ function reportVirtLeftTouchMove(pad) {
     const xPer = xDiff / pad.touchstickRadius;
     const yPer = yDiff / pad.touchstickRadius;
 
+    if(xPer > AXES_THRESHOLD) {
+        if(!pad.virtButtons["a0pos"]) {
+            pad.virtButtons["a0pos"] = true;
+            reportDown(pad.id, "a0pos");
+        }
+    } else {
+        if(pad.virtButtons["a0pos"]) {
+            pad.virtButtons["a0pos"] = false;
+            reportUp(pad.id, "a0pos");
+        }
+    }
+
+    if(xPer < -AXES_THRESHOLD) {
+        if(!pad.virtButtons["a0neg"]) {
+            pad.virtButtons["a0neg"] = true;
+            reportDown(pad.id, "a0neg");
+        }
+    } else {
+        if(pad.virtButtons["a0neg"]) {
+            pad.virtButtons["a0neg"] = false;
+            reportUp(pad.id, "a0neg");
+        }
+    }
+
+    if(yPer > AXES_THRESHOLD) {
+        if(!pad.virtButtons["a1pos"]) {
+            pad.virtButtons["a1pos"] = true;
+            reportDown(pad.id, "a1pos");
+        }
+    } else {
+        if(pad.virtButtons["a1pos"]) {
+            pad.virtButtons["a1pos"] = false;
+            reportUp(pad.id, "a1pos");
+        }
+    }
+
+    if(yPer < -AXES_THRESHOLD) {
+        if(!pad.virtButtons["a1neg"]) {
+            pad.virtButtons["a1neg"] = true;
+            reportDown(pad.id, "a1neg");
+        }
+    } else {
+        if(pad.virtButtons["a1neg"]) {
+            pad.virtButtons["a1neg"] = false;
+            reportUp(pad.id, "a1neg");
+        }
+    }
+
     reportVelocity(pad.id, 1, yPer);
     reportVelocity(pad.id, 0, xPer);
 }
@@ -1366,6 +1456,54 @@ function reportVirtRightTouchMove(pad) {
 
     const xPer = xDiff / pad.touchstickRadius;
     const yPer = yDiff / pad.touchstickRadius;
+
+    if(xPer > AXES_THRESHOLD) {
+        if(!pad.virtButtons["a2pos"]) {
+            pad.virtButtons["a2pos"] = true;
+            reportDown(pad.id, "a2pos");
+        }
+    } else {
+        if(pad.virtButtons["a2pos"]) {
+            pad.virtButtons["a2pos"] = false;
+            reportUp(pad.id, "a2pos");
+        }
+    }
+
+    if(xPer < -AXES_THRESHOLD) {
+        if(!pad.virtButtons["a2neg"]) {
+            pad.virtButtons["a2neg"] = true;
+            reportDown(pad.id, "a2neg");
+        }
+    } else {
+        if(pad.virtButtons["a2neg"]) {
+            pad.virtButtons["a2neg"] = false;
+            reportUp(pad.id, "a2neg");
+        }
+    }
+
+    if(yPer > AXES_THRESHOLD) {
+        if(!pad.virtButtons["a3pos"]) {
+            pad.virtButtons["a3pos"] = true;
+            reportDown(pad.id, "a3pos");
+        }
+    } else {
+        if(pad.virtButtons["a3pos"]) {
+            pad.virtButtons["a3pos"] = false;
+            reportUp(pad.id, "a3pos");
+        }
+    }
+
+    if(yPer < -AXES_THRESHOLD) {
+        if(!pad.virtButtons["a3neg"]) {
+            pad.virtButtons["a3neg"] = true;
+            reportDown(pad.id, "a3neg");
+        }
+    } else {
+        if(pad.virtButtons["a3neg"]) {
+            pad.virtButtons["a3neg"] = false;
+            reportUp(pad.id, "a3neg");
+        }
+    }
 
     reportVelocity(pad.id, 3, yPer);
     reportVelocity(pad.id, 2, xPer);
