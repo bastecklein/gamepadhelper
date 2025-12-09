@@ -223,11 +223,16 @@ class VirtualPad {
  * @param {boolean} [options.ignoreKeyboard=false] - Whether to ignore keyboard events for remotes.
  * @param {Function} [options.onConnect] - Callback for gamepad connection events.
  * @param {Function} [options.onDisconnect] - Callback for gamepad disconnection events.
+ * @param {Function} [options.forceAndroidTV] - Set forced Android TV mode
  */
 export function register(options) {
 
     if(options.adl != undefined) {
         adl = options.adl;
+    }
+
+    if(options.forceAndroidTV) {
+        runningOnAndroidTV = options.forceAndroidTV;
     }
 
     if(options.remotes != undefined) {
