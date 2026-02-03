@@ -24,8 +24,8 @@
     "main": "gamepadhelper.js",
     "config": {},
     "dependencies": {
-        "common-helpers": "git+ssh://git@github.com:bastecklein/common-helpers.git#main",
-        "input-helper": "git+ssh://git@github.com:bastecklein/input-helper.git#main"
+        "common-helpers": "https://github.com/bastecklein/common-helpers.git",
+        "input-helper": "https://github.com/bastecklein/input-helper.git"
     },
     "devDependencies": {
         "@eslint/js": "*",
