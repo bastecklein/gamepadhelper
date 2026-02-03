@@ -1533,10 +1533,10 @@ function gamepadXYCheck(direction, compareElement, useParent) {
         return compareElement;
     }
 
-    nextElement = elements[0];
-
     const checkBounds = compareElement.getBoundingClientRect();
-    let closestElement = 999999;
+    const centerCheck = getBoundsCenterPosition(checkBounds);
+
+    let bestScore = Number.POSITIVE_INFINITY;
 
     for(let i = 0; i < elements.length; i++) {
         const element = elements[i];
@@ -1547,44 +1547,55 @@ function gamepadXYCheck(direction, compareElement, useParent) {
 
         const bounds = element.getBoundingClientRect();
 
-        let doCheck = false;
+        let inDirection = false;
+        let hasOverlap = false;
 
         if(direction == "right") {
-            if(bounds.left >= checkBounds.right - GP_HILIGHT_PADDING) {
-                doCheck = true;
-            }
+            inDirection = bounds.left >= checkBounds.right - GP_HILIGHT_PADDING;
+            hasOverlap = bounds.top <= checkBounds.bottom && bounds.bottom >= checkBounds.top;
         }
 
         if(direction == "left") {
-            if(bounds.right <= checkBounds.left + GP_HILIGHT_PADDING) {
-                doCheck = true;
-            }
+            inDirection = bounds.right <= checkBounds.left + GP_HILIGHT_PADDING;
+            hasOverlap = bounds.top <= checkBounds.bottom && bounds.bottom >= checkBounds.top;
         }
 
         if(direction == "up") {
-            if(bounds.bottom <= checkBounds.top + GP_HILIGHT_PADDING) {
-                doCheck = true;
-            }
+            inDirection = bounds.bottom <= checkBounds.top + GP_HILIGHT_PADDING;
+            hasOverlap = bounds.left <= checkBounds.right && bounds.right >= checkBounds.left;
         }
 
         if(direction == "down") {
-            if(bounds.top >= checkBounds.bottom - GP_HILIGHT_PADDING) {
-                doCheck = true;
-            }
+            inDirection = bounds.top >= checkBounds.bottom - GP_HILIGHT_PADDING;
+            hasOverlap = bounds.left <= checkBounds.right && bounds.right >= checkBounds.left;
         }
 
-        if(doCheck) {
-
-            const centerCheck = getBoundsCenterPosition(checkBounds);
-            const center = getBoundsCenterPosition(bounds);
-
-            const dist = distBetweenPoints(centerCheck.x, centerCheck.y, center.x, center.y);
-
-            if(dist < closestElement) {
-                nextElement = element;
-                closestElement = dist;
-            }
+        if(!inDirection) {
+            continue;
         }
+
+        const center = getBoundsCenterPosition(bounds);
+
+        const dx = center.x - centerCheck.x;
+        const dy = center.y - centerCheck.y;
+
+        const primary = (direction == "left" || direction == "right") ? Math.abs(dx) : Math.abs(dy);
+        const secondary = (direction == "left" || direction == "right") ? Math.abs(dy) : Math.abs(dx);
+
+        let score = (primary * 1.5) + secondary;
+
+        if(!hasOverlap) {
+            score += 10000;
+        }
+
+        if(score < bestScore) {
+            nextElement = element;
+            bestScore = score;
+        }
+    }
+
+    if(!nextElement) {
+        return compareElement;
     }
 
     return nextElement;
