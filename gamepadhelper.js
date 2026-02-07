@@ -637,7 +637,7 @@ export function createVirtualPad(options) {
             pad.rightStick = options.rightStick;
         }
 
-        if(options.buttons != undefined) {
+        if(options.buttons != undefined && options.buttons != null) {
             pad.buttons = options.buttons;
         }
 
@@ -645,19 +645,19 @@ export function createVirtualPad(options) {
             pad.touchstickRadius = options.touchstickRadius;
         }
 
-        if(options.downFunc != undefined) {
+        if(options.downFunc != undefined && options.downFunc != null) {
             pad.downFunc = options.downFunc;
         }
 
-        if(options.upFunc != undefined) {
+        if(options.upFunc != undefined && options.upFunc != null) {
             pad.upFunc = options.upFunc;
         }
 
-        if(options.moveFunc != undefined) {
+        if(options.moveFunc != undefined && options.moveFunc != null) {
             pad.moveFunc = options.moveFunc;
         }
 
-        if(options.stickColor != undefined) {
+        if(options.stickColor != undefined && options.stickColor != null) {
             pad.stickColor = options.stickColor;
 
             const color = hexToRGB(options.stickColor);
