@@ -1,4 +1,4 @@
-import { guid, distBetweenPoints } from "common-helpers";
+import { guid, distBetweenPoints, hexToRGB } from "common-helpers";
 import IPH from "input-helper";
 
 const userAgent = navigator.userAgent;
@@ -203,6 +203,9 @@ class VirtualPad {
         this.upFunc = null;
 
         this.noRender = false;
+
+        this.stickColor = "#ffffff";
+        this.stickFill = "rgba(255, 255, 255, 0.4)";
     }
     
     render() {
@@ -653,6 +656,14 @@ export function createVirtualPad(options) {
         if(options.moveFunc != undefined) {
             pad.moveFunc = options.moveFunc;
         }
+
+        if(options.stickColor != undefined) {
+            pad.stickColor = options.stickColor;
+
+            const color = hexToRGB(options.stickColor);
+
+            pad.stickFill = "rgba(" + color.r + ", " + color.g + ", " + color.b + ", 0.4)";
+        }
     }
 
     IPH.handleInput({
@@ -911,11 +922,11 @@ function renderVirtPad(pad) {
     }
 
     if(pad.leftStick && pad.touchstickLeftX > -1 && pad.touchstickLeftY > -1) {
-        renderTouchStick(pad.context, pad.touchstickRadius, pad.touchstickLeftX, pad.touchstickLeftY, pad.touchstickLeftMX, pad.touchstickLeftMY);
+        renderTouchStick(pad.context, pad.touchstickRadius, pad.touchstickLeftX, pad.touchstickLeftY, pad.touchstickLeftMX, pad.touchstickLeftMY, pad.stickColor, pad.stickFill);
     }
 
     if(pad.rightStick && pad.touchstickRightX > -1 && pad.touchstickRightY > -1) {
-        renderTouchStick(pad.context, pad.touchstickRadius, pad.touchstickRightX, pad.touchstickRightY, pad.touchstickRightMX, pad.touchstickRightMY);
+        renderTouchStick(pad.context, pad.touchstickRadius, pad.touchstickRightX, pad.touchstickRightY, pad.touchstickRightMX, pad.touchstickRightMY, pad.stickColor, pad.stickFill);
     }
 
     if(pad.buttons) {
@@ -926,9 +937,9 @@ function renderVirtPad(pad) {
     }
 }
 
-function renderTouchStick(context, rad, cx, cy, sx, sy) {
-    context.strokeStyle = "#ffffff";
-    context.fillStyle = "rgba(255, 255, 255, 0.4)";
+function renderTouchStick(context, rad, cx, cy, sx, sy, stickColor, stickFill) {
+    context.strokeStyle = stickColor;
+    context.fillStyle = stickFill;
 
     context.beginPath();
     context.arc(cx, cy, rad, 0, Math.PI * 2);
