@@ -1706,5 +1706,7 @@ export default {
     highlightSelectedTitleElement,
     createVirtualPad,
     setScrollBehavior,
-    getADLPadZone
+    getADLPadZone,
+    TRADITIONAL_AXES_NAMES,
+    STANDARD_BUTTONS
 };
