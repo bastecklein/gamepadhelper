@@ -228,13 +228,13 @@ class VirtualPad {
  * @param {Function} [options.onDisconnect] - Callback for gamepad disconnection events.
  * @param {Function} [options.forceAndroidTV] - Set forced Android TV mode
  */
-export function register(options) {
+export function register(options = {}) {
 
     if(options.adl != undefined) {
         adl = options.adl;
     }
 
-    if(options.forceAndroidTV) {
+    if(options.forceAndroidTV != undefined) {
         runningOnAndroidTV = options.forceAndroidTV;
     }
 
@@ -458,7 +458,7 @@ export function handleUIGamepadSelection(element, btn) {
 
         gamepadTitleItem.click();
 
-        if(gamepadTitleItem && gamepadTitleItem.tagName && (gamepadTitleItem.tagName == "input" || gamepadTitleItem.tagName == "textarea")) {
+        if(gamepadTitleItem && gamepadTitleItem.tagName && (gamepadTitleItem.tagName == "INPUT" || gamepadTitleItem.tagName == "TEXTAREA")) {
             if(window.Android && window.Android.forceOpenKeyboard) {
                 window.Android.forceOpenKeyboard();
             }
@@ -854,6 +854,10 @@ function onHostPadEvent(action, id, key) {
 
     const conv = ANDROID_HOST_BUTTONS[key];
 
+    if(conv == undefined) {
+        return;
+    }
+
     // down
     if(action == 0) {
         reportDown(id, conv);
@@ -942,13 +946,39 @@ function renderTouchStick(context, rad, cx, cy, sx, sy, stickColor, stickFill) {
     context.strokeStyle = stickColor;
     context.fillStyle = stickFill;
 
+    // Keep the rendered inner knob on the same circular boundary used by input reporting.
+    const diff = clampStickDiff(sx - cx, sy - cy, rad);
+    const xDiff = diff.x;
+    const yDiff = diff.y;
+
+    const renderX = cx + xDiff;
+    const renderY = cy + yDiff;
+
     context.beginPath();
     context.arc(cx, cy, rad, 0, Math.PI * 2);
     context.stroke();
 
     context.beginPath();
-    context.arc(sx, sy, Math.ceil(rad * 0.3), 0, Math.PI * 2);
+    context.arc(renderX, renderY, Math.ceil(rad * 0.3), 0, Math.PI * 2);
     context.fill();
+}
+
+function clampStickDiff(xDiff, yDiff, radius) {
+    const mag = Math.hypot(xDiff, yDiff);
+
+    if(mag <= radius || mag == 0) {
+        return {
+            x: xDiff,
+            y: yDiff
+        };
+    }
+
+    const scale = radius / mag;
+
+    return {
+        x: xDiff * scale,
+        y: yDiff * scale
+    };
 }
 
 function renderTouchButton(canvas, context, button) {
@@ -961,23 +991,23 @@ function renderTouchButton(canvas, context, button) {
         radius = button.radius;
     }
 
-    if(button.left) {
+    if(button.left != undefined) {
         x = button.left;
         x += radius;
     }
 
-    if(button.right) {
+    if(button.right != undefined) {
         x = canvas.width - button.right;
         x -= radius;
 
     }
 
-    if(button.top) {
+    if(button.top != undefined) {
         y = button.top;
         y += radius;
     }
 
-    if(button.bottom) {
+    if(button.bottom != undefined) {
         y = canvas.height - button.bottom;
         y -= radius;
     }
@@ -1292,23 +1322,25 @@ function onGamepadConnected(e) {
 }
 
 function onGamepadDisconnected(e) {
-    const gp = navigator.getGamepads()[e.gamepad.index];
+    if(!e || !e.gamepad) {
+        return;
+    }
 
-    if(gp) {
+    const idx = e.gamepad.index;
 
-        delete pads.traditional[gp.index];
+    delete pads.traditional[idx];
+    delete pads.traditionalVelocities[idx];
 
-        if(listeners.onDisconnect) {
-            listeners.onDisconnect({
-                idx: e.gamepad.index
-            });
-        }
+    if(listeners.onDisconnect) {
+        listeners.onDisconnect({
+            idx: idx
+        });
+    }
 
-        if(singleOnly) {
-            if(activeSinglePad == e.gamepad.index) {
-                clearActivePadTimeout();
-                activeSinglePad = null;
-            }
+    if(singleOnly) {
+        if(activeSinglePad == idx) {
+            clearActivePadTimeout();
+            activeSinglePad = null;
         }
     }
 }
@@ -1375,21 +1407,9 @@ function reportVirtLeftTouchMove(pad) {
     let xDiff = pad.touchstickLeftMX - pad.touchstickLeftX;
     let yDiff = pad.touchstickLeftMY - pad.touchstickLeftY;
 
-    if(xDiff > pad.touchstickRadius) {
-        xDiff = pad.touchstickRadius;
-    }
-
-    if(xDiff < -pad.touchstickRadius) {
-        xDiff = -pad.touchstickRadius;
-    }
-
-    if(yDiff > pad.touchstickRadius) {
-        yDiff = pad.touchstickRadius;
-    }
-
-    if(yDiff < -pad.touchstickRadius) {
-        yDiff = -pad.touchstickRadius;
-    }
+    const diff = clampStickDiff(xDiff, yDiff, pad.touchstickRadius);
+    xDiff = diff.x;
+    yDiff = diff.y;
 
     const xPer = xDiff / pad.touchstickRadius;
     const yPer = yDiff / pad.touchstickRadius;
@@ -1455,21 +1475,9 @@ function reportVirtRightTouchMove(pad) {
     let xDiff = pad.touchstickRightMX - pad.touchstickRightX;
     let yDiff = pad.touchstickRightMY - pad.touchstickRightY;
 
-    if(xDiff > pad.touchstickRadius) {
-        xDiff = pad.touchstickRadius;
-    }
-
-    if(xDiff < -pad.touchstickRadius) {
-        xDiff = -pad.touchstickRadius;
-    }
-
-    if(yDiff > pad.touchstickRadius) {
-        yDiff = pad.touchstickRadius;
-    }
-
-    if(yDiff < -pad.touchstickRadius) {
-        yDiff = -pad.touchstickRadius;
-    }
+    const diff = clampStickDiff(xDiff, yDiff, pad.touchstickRadius);
+    xDiff = diff.x;
+    yDiff = diff.y;
 
     const xPer = xDiff / pad.touchstickRadius;
     const yPer = yDiff / pad.touchstickRadius;
