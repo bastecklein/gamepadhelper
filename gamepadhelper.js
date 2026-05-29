@@ -668,6 +668,7 @@ export function createVirtualPad(options) {
 
     IPH.handleInput({
         element: pad.canvas,
+        suppressNative: true,
         down: function(e) {
             if(pad.downFunc) {
                 pad.downFunc(e);
