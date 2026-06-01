@@ -919,12 +919,18 @@ function renderVirtPad(pad) {
         return;
     }
 
-    pad.canvas.width = w;
-    pad.canvas.height = h;
+    // Re-allocating the canvas every frame can trigger rendering issues in
+    // some embedded Android WebView hosts. Only resize when dimensions change.
+    if(pad.canvas.width != w || pad.canvas.height != h) {
+        pad.canvas.width = w;
+        pad.canvas.height = h;
+    }
 
     if(pad.noRender) {
         return;
     }
+
+    pad.context.clearRect(0, 0, w, h);
 
     if(pad.leftStick && pad.touchstickLeftX > -1 && pad.touchstickLeftY > -1) {
         renderTouchStick(pad.context, pad.touchstickRadius, pad.touchstickLeftX, pad.touchstickLeftY, pad.touchstickLeftMX, pad.touchstickLeftMY, pad.stickColor, pad.stickFill);
@@ -943,8 +949,11 @@ function renderVirtPad(pad) {
 }
 
 function renderTouchStick(context, rad, cx, cy, sx, sy, stickColor, stickFill) {
+    const exWidth = context.lineWidth;
+
     context.strokeStyle = stickColor;
     context.fillStyle = stickFill;
+    context.lineWidth = 1;
 
     // Keep the rendered inner knob on the same circular boundary used by input reporting.
     const diff = clampStickDiff(sx - cx, sy - cy, rad);
@@ -961,6 +970,8 @@ function renderTouchStick(context, rad, cx, cy, sx, sy, stickColor, stickFill) {
     context.beginPath();
     context.arc(renderX, renderY, Math.ceil(rad * 0.3), 0, Math.PI * 2);
     context.fill();
+
+    context.lineWidth = exWidth;
 }
 
 function clampStickDiff(xDiff, yDiff, radius) {
